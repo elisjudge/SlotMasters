@@ -14,6 +14,29 @@ symbol_count = {
     "D": 8
 }
 
+symbol_multipliers = {
+    "A": 10,
+    "B": 5,
+    "C": 3,
+    "D": 2
+}
+
+def check_winnings(columns, lines, bet, multipliers):
+    winnings = 0
+    winning_lines = []
+    for line in range(lines):
+        symbol = columns[0][line]
+        for column in columns:
+            symbol_to_check = column[line]
+            if symbol != symbol_to_check:
+                break
+        else: 
+            winnings += multipliers[symbol] * bet
+            winning_lines.append(line + 1)
+    
+    return winnings, winning_lines
+
+
 def deposit():
     while True:
         amount = input("How much would you like to deposit? $")
@@ -90,15 +113,14 @@ def print_slot_machine(columns):
         print()  
 
 
-def main():
-    balance = deposit()
+def spin(current_balance):
     lines = get_number_of_lines()
     while True:
         bet = get_bet()
         total_bet = bet * lines
 
-        if total_bet > balance:
-            print(f"You do not have enough funds to place this bet, your current balance is ${balance}.")
+        if total_bet > current_balance:
+            print(f"You do not have enough funds to place this bet, your current balance is ${current_balance}.")
         else:
             break
 
@@ -106,6 +128,27 @@ def main():
 
     slots = get_slot_machine_spin(rows=ROWS, cols=COLS, symbols=symbol_count)
     print_slot_machine(slots)
+    winnings, winning_lines = check_winnings(columns=slots, lines=lines, bet=bet, multipliers=symbol_multipliers)
+    
+    if not winning_lines:
+        print(f"Sorry, you did not win this time. Try Again.")
+    else:
+        print(f"You won ${winnings}.")
+        print(f"You won on lines:", *winning_lines)
+    
+    return winnings - total_bet
+
+
+def main():
+    balance = deposit()
+    while True:
+        print(f"Current balance is ${balance}")
+        answer = input("Please enter to play (q to quit).")
+        if answer == "q":
+            break
+        balance += spin(current_balance= balance)
+
+    print(f"You ended up leaving with ${balance}")
 
 
 if __name__ == "__main__":
